@@ -117,7 +117,23 @@ public class AnimationModelImpl extends AbstractAnimationModel {
 
       AbstractShape s = shapes.get(i);
 
+      //add the header
       result += "shape " + s.name + " " + s.getClass().getSimpleName() + "\n";
+      //add the first half line of the log for the shape
+      result += "motion " + s.name + " 1 " + s.currentPosition.getX() + " "
+              + s.currentPosition.getY() + " " + s.width + " " + s.height + " " + s.r + " " + s.g
+              + " " + s.b + "     ";
+
+      ArrayList<AbstractMove> movesForThisShape = getMovesForThisShape(s);
+
+      int firstMoveTick = firstMove(movesForThisShape);
+
+      //add the second half of the first line for the log to the shape
+      result += firstMoveTick + " " + s.currentPosition.getX() + " "
+              + s.currentPosition.getY() + " " + s.width + " " + s.height + " " + s.r + " " + s.g
+              + " " + s.b;
+
+      //add the rest of the log to the shape
       result += s.shapeLog;
 
       if (i != shapes.size() - 1) {
@@ -125,5 +141,41 @@ public class AnimationModelImpl extends AbstractAnimationModel {
       }
     }
     return result;
+  }
+
+  //returns the list of AbstractMove for the given Shape
+  private ArrayList<AbstractMove> getMovesForThisShape(AbstractShape s) {
+    ArrayList<AbstractMove> movesForGivenShape = new ArrayList<AbstractMove>();
+    //for the given shape, cycle through the moves and return the
+    // list of all that apply to this move
+    for (AbstractMove move : moves) {
+      if (move.toActUpon.equals(s)) {
+        movesForGivenShape.add(move);
+      }
+    }
+    return movesForGivenShape;
+  }
+
+  //returns the integer value for the earliest tick move from the given list of moves
+  //return -1 if there are no moves in the given list
+  private int firstMove(ArrayList<AbstractMove> givenMoves) {
+    int firstMoveTime = -1;
+    for (AbstractMove m : givenMoves) {
+      if (m.startTick < firstMoveTime || firstMoveTime == -1) {
+        firstMoveTime = m.startTick;
+      }
+    }
+    return firstMoveTime;
+  }
+
+  private void addMovesToShapeLog() {
+    //for every move in this moves, add the move toString method to their shapeLog
+    for (int i = 0; i < moves.size(); i++) {
+      AbstractMove currentMove = moves.get(i);
+
+      AbstractShape currentShape = currentMove.toActUpon;
+
+      currentShape.shapeLog += currentMove.getMoveSummary();
+    }
   }
 }
